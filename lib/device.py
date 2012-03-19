@@ -107,8 +107,7 @@ class Device(object):
                 property(lambda self: self.__get(_pv),
                          lambda self, val: self.__put(_pv, val),
                          None,
-                         "EPICS PV: '{0}'".format(
-                             self.__get_full_pvname(_pv.pvname))))
+                         "EPICS PV: '{0}'".format(_pv.pvname)))
 
     def __init__(self, prefix='', attrs=None, alias=None, delim='', timeout=None):
         self._pvs = {}
@@ -126,14 +125,10 @@ class Device(object):
 
         ca.poll()
 
-    def __get_full_pvname(self, attr):
-        "return full pvname (prefix + pvname)"
-        return "".join((self._prefix or "", attr))
-
     def get_pv(self, attr, connect=True, timeout=None):
         """return epics.PV for a device attribute"""
         if attr not in self._pvs:
-            self._pvs[attr] = PV(self.__get_full_pvname(attr),
+            self._pvs[attr] = PV("".join((self._prefix or "", attr)),
                                  connection_timeout=timeout)
         if connect and not self._pvs[attr].connected:
             self._pvs[attr].wait_for_connection()
