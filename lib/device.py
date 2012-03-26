@@ -82,47 +82,51 @@ class Device(object):
 
     you can all get
     """
-    def __get(self, _pv):
-        "helper for getter (closure), return value"
-        val = _pv.get()
-        if val == None:
-            raise AttributeError("'{0}' object could not get '{1}'"
-                                 .format(self._prefix.strip("."), _pv.pvname))
-        return val
 
-    def __put(self, _pv, val):
-        "helper for setter (closure), put value"
-        if not _pv.wait_for_connection():
-            raise IOError("'{0}' object could not connect to '{1}'"
-                .format(self._prefix.strip("."), _pv.pvname))
-        if _pv.put(val, wait=True, use_complete=False, timeout=1) == -1:
-            raise IOError("'{0}' object could not put '{1}'"
-                          .format(self._prefix.strip("."), _pv.pvname))
-
-    def __add_pv_property(self, _pv, name=None):
+    def _add_pv_property(self, pv_name, name=None):
         "compose property"
-        name = name or _pv.pvname.split(".")[-1].lower()
-        setattr(Device,
-                name,
-                property(lambda self: self.__get(_pv),
-                         lambda self, val: self.__put(_pv, val),
-                         None,
-                         "EPICS PV: '{0}'".format(_pv.pvname)))
+        name = name or pv_name.upper()
 
-    def __init__(self, prefix='', attrs=None, alias=None, delim='', timeout=None):
+        def get(self, pv_name):
+            "helper for getter, return value"
+            _pv = self.get_pv(pv_name)
+            val = _pv.get()
+            if val == None:
+                raise AttributeError("'{0}' object could not get '{1}'"
+                                     .format(self._prefix.strip("."),
+                                     _pv.pvname))
+            return val
+
+        def put(self, pv_name, val):
+            "helper for setter, put value"
+            _pv = self.get_pv(pv_name)
+            if not _pv.wait_for_connection():
+                raise IOError("'{0}' object could not connect to '{1}'"
+                              .format(self._prefix.strip("."), _pv.pvname))
+            if _pv.put(val, wait=True, use_complete=False, timeout=1) == -1:
+                raise IOError("'{0}' object could not put '{1}'"
+                              .format(self._prefix.strip("."), _pv.pvname))
+
+        if not hasattr(self.__class__, name):
+            setattr(self.__class__,
+                    name.lower(),
+                    property(lambda self: get(self, name),
+                             lambda self, val: put(self, name, val),
+                             None,
+                             ))
+
+    def __init__(self, prefix='', attrs=None, alias=None, delim='',
+                 timeout=None):
         self._pvs = {}
         self._delim = delim
         self._prefix = prefix + delim
 
         if attrs:
-            map(self.__add_pv_property,
-                map(partial(self.get_pv, connect=False, timeout=timeout),
-                    attrs))
+            map(self._add_pv_property, attrs)
         if alias:
-            map(partial(self.__add_pv_property),
+            map(partial(self._add_pv_property),
                 map(self.get_pv, alias.values()),
                    alias.keys())
-
         ca.poll()
 
     def get_pv(self, attr, connect=True, timeout=None):
@@ -154,7 +158,7 @@ class Device(object):
         """
         if attr is None:
             attr = pvname
-        self.__add_pv_property(self.get_pv(attr))
+        self._add_pv_property(attr)
 
         return self._pvs[attr]
 
