@@ -129,10 +129,6 @@ class Motor(device.Device):
     """
     # parameter name (short), PV suffix,  longer description
 
-    #
-    _extras =  {
-        'disabled':   '_able.VAL', }
-
     _alias = {
         'acceleration':    'ACCL',
         'back_accel':      'BACC',
@@ -244,9 +240,6 @@ class Motor(device.Device):
          # make sure this is really a motor!
         if self.rtyp != 'motor':
             raise MotorException("%s is not an Epics Motor" % name)
-
-        for key, val in self._extras.items():
-            self.add_pv(".".join((name, val)), attr=key)
 
         self._callbacks = {}
 
