@@ -85,7 +85,8 @@ class Device(object):
 
     def _add_pv_property(self, pv_name, name=None):
         "compose property"
-        name = name or pv_name.upper()
+        pv_name = pv_name.upper()
+        name = name or pv_name
 
         def get(self, pv_name):
             "helper for getter, return value"
@@ -110,8 +111,8 @@ class Device(object):
         if not hasattr(self.__class__, name):
             setattr(self.__class__,
                     name.lower(),
-                    property(lambda self: get(self, name),
-                             lambda self, val: put(self, name, val),
+                    property(lambda self: get(self, pv_name),
+                             lambda self, val: put(self, pv_name, val),
                              None,
                              ))
 
@@ -125,8 +126,8 @@ class Device(object):
             map(self._add_pv_property, attrs)
         if alias:
             map(partial(self._add_pv_property),
-                map(self.get_pv, alias.values()),
-                   alias.keys())
+                alias.values(),
+                alias.keys())
         ca.poll()
 
     def get_pv(self, attr, connect=True, timeout=None):
