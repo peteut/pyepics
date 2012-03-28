@@ -244,7 +244,7 @@ class Motor(device.Device):
         self._callbacks = {}
 
     def __repr__(self):
-        return "<epics.Motor: {0}>".format(self._prefix.strip("."))
+        return "<epics.Motor: %s>" % self._prefix.strip(".")
 
     def __str__(self):
         return self.__repr__()

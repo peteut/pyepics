@@ -93,8 +93,8 @@ class Device(object):
             _pv = self.get_pv(pv_name)
             val = _pv.get()
             if val == None:
-                raise AttributeError("'{0}' object could not get '{1}'"
-                                     .format(self._prefix.strip("."),
+                raise AttributeError("'%s' object could not get '%s'" %
+                                     (self._prefix.strip("."),
                                      _pv.pvname))
             return val
 
@@ -102,11 +102,11 @@ class Device(object):
             "helper for setter, put value"
             _pv = self.get_pv(pv_name)
             if not _pv.wait_for_connection():
-                raise IOError("'{0}' object could not connect to '{1}'"
-                              .format(self._prefix.strip("."), _pv.pvname))
+                raise IOError("'%s' object could not connect to '%s'" %
+                              (self._prefix.strip("."), _pv.pvname))
             if _pv.put(val, wait=True, use_complete=False, timeout=1) == -1:
-                raise IOError("'{0}' object could not put '{1}'"
-                              .format(self._prefix.strip("."), _pv.pvname))
+                raise IOError("'%s' object could not put '%s'" %
+                              (self._prefix.strip("."), _pv.pvname))
 
         if not hasattr(self.__class__, name):
             setattr(self.__class__,
@@ -170,22 +170,22 @@ class Device(object):
         up to a supplied timeout value"""
         thispv = self.get_pv(attr)
         if not thispv.wait_for_connection():
-            raise RuntimeError("'{0}' object could not connect to '{1}'"
-                .format(self._prefix.strip("."), attr))
+            raise RuntimeError("'%s' object could not connect to '%s'" %
+                               (self._prefix.strip("."), attr))
         if thispv.put(value,
             wait=wait,
             use_complete=use_complete,
             timeout=timeout) == -1:
-            raise RuntimeError("'{0}' object could not put '{1}'"
-                .format(self._prefix.strip("."), attr))
+            raise RuntimeError("'%s' object could not put '%s'" %
+                               (self._prefix.strip("."), attr))
 
     def get(self, attr, as_string=False, count=None):
         """get an attribute value,
         option as_string returns a string representation"""
         val = self.get_pv(attr).get(as_string=as_string, count=count)
         if val == None:
-            raise AttributeError("'{0}' could not get '{1}'"
-                                 .format(self._prefix.strip("."), attr))
+            raise AttributeError("'%s' could not get '%s'" %
+                                 (self._prefix.strip("."), attr))
         return val
 
     def save_state(self):
@@ -267,7 +267,7 @@ class Device(object):
 
     def __repr__(self):
         "string representation"
-        return "<Device '{0}' {1} attributes>".format(self._prefix.strip("."),
+        return "<Device '%s' %i attributes>" % (self._prefix.strip("."),
             len(self._pvs))
 
     @staticmethod
