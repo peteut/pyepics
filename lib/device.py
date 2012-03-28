@@ -131,8 +131,9 @@ class Device(object):
 
     def get_pv(self, attr, connect=True, timeout=None):
         """return epics.PV for a device attribute"""
+        attr = attr.lower()
         if attr not in self._pvs:
-            self._pvs[attr] = PV("".join((self._prefix or "", attr)),
+            self._pvs[attr] = PV("".join((self._prefix, attr.upper())),
                                  connection_timeout=timeout)
         if connect and not self._pvs[attr].connected:
             self._pvs[attr].wait_for_connection()
